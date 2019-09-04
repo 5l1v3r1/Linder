@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/sh
 
-apt update && apt install python wget
+apt update && apt install python wget -y
 
 if [ -e $PREFIX/bin/apkmod ]
 then
