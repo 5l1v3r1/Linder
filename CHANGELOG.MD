@@ -8,3 +8,4 @@
 - Added isOnline() for checking data connection status & don't update if
 data connection is OFF
 - fixed invalid register error #2
+- Removed curl , wget and which os based dependencies for better cross platform support
