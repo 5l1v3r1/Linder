@@ -48,17 +48,15 @@ def isOnline():
 
 def Update():
 		print_status(YELLOW + 'Checking for updates...')
-		o = open('.ver','r')
-		oo = o.read()
-		o.close()
-		u=urllib.request.urlopen('https://raw.githubusercontent.com/TheSpeedX/Linder/master/.ver').read().decode('utf-8')
+		oo = open('.ver','r').read()
+		u=urllib.request.urlopen('https://raw.githubusercontent.com/R37r0-Gh057/Linder/master/.ver').read().decode('utf-8')
 		if oo.split('\n')[0] == u.split('\n')[0]:
 			print_status(YELLOW + 'No updates available')
 		else:
 			print_status(GREEN + "Update available. Updating...(DONT CLOSE!) ")
 			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-install.sh','.ver']
 			for fn in files_to_update:
-				u=urllib.request.urlopen('https://raw.githubusercontent.com/TheSpeedX/Linder/master/'+fn).read().decode('utf-8')
+				u=urllib.request.urlopen('https://raw.githubusercontent.com/R37r0-Gh057/Linder/master/'+fn).read().decode('utf-8')
 				f=open(fn,'w')
 				f.write(u)
 				f.close()
