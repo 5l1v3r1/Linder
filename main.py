@@ -54,12 +54,22 @@ def Update():
 			print_status(YELLOW + 'No updates available')
 		else:
 			print_status(GREEN + "Update available. Updating...(DONT CLOSE!) ")
-			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-install.sh','CHANGELOG.MD','.ver']
+			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-setup.sh','CHANGELOG.MD','.ver']
 			for fn in files_to_update:
-				u=urllib.request.urlopen('https://raw.githubusercontent.com/R37r0-Gh057/Linder/master/'+fn).read().decode('utf-8')
-				f=open(fn,'w')
+				try:
+					u=urllib.request.urlopen('https://github.com/R37r0-Gh057/Linder/blob/master/'+fn).read().decode('utf-8')
+				except:
+					err_msg("Error While Fetching Updates...")
+					print_status(YELLOW+"Reverting Changes...")
+					for dlf in files_to_update:
+						os.remove(dlf+'.tmp')
+					print_status("Exiting....")
+					exit()
+				f=open(fn+'.tmp','w')
 				f.write(u)
 				f.close()
+			for fn in files_to_update:
+				os.rename(fn+'.tmp',fn)
 			print_status(GREEN + "Update Finished....")
 			print_status(BLUE + "Please Restart The Script...")
 			exit()
