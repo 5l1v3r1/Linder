@@ -57,7 +57,7 @@ def Update():
 			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-setup.sh','CHANGELOG.MD','.ver']
 			for fn in files_to_update:
 				try:
-					u=urllib.request.urlopen('https://github.com/R37r0-Gh057/Linder/blob/master/'+fn).read().decode('utf-8')
+					u=urllib.request.urlopen('https://github.com/R37r0-Gh057/Linder/raw/master/'+fn).read().decode('utf-8')
 				except:
 					err_msg("Error While Fetching Updates...")
 					print_status(YELLOW+"Reverting Changes...")
