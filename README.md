@@ -20,7 +20,7 @@ It just automates the following:-
   
   [+] Signing.
 
-There are some apps like FacebookLite which are a little protected by this method. The MainActivity smali file specified in the Manifest is not present. I'll come up with something in the next update.
+**There are some apps like FacebookLite which are a little protected by this method. The MainActivity smali file specified in the Manifest is not present. And there are also some other apps that throw some errors on decompiling. May take a while to fix.**
 
 And a Special Thanks to [TheSpeedX](https://github.coom/TheSpeedX) for optimising this script.
 
