@@ -62,7 +62,7 @@ def Update():
 			o.close()
 			os.system(rm + ' .ver')
 			os.system('curl -s -LO https://github.com/R37r0-Gh057/Linder/raw/master/.ver')
-			u = open('.ver','r').read()
+			u = open('.ver','r').read().replace('\n','')
 			if int(oo) == int(u):
 				print_status(YELLOW + 'No updates available')
 			else:
