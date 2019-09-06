@@ -15,6 +15,6 @@ else
     clear
     echo ALL SET. EVERYTHING HAS INSTALLED.
   else
-    echo The installation waws interrupted. please run this script again
+    echo The installation was interrupted. please run this script again
   fi
 fi
