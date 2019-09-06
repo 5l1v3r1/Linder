@@ -54,7 +54,7 @@ def Update():
 			print_status(YELLOW + 'No updates available')
 		else:
 			print_status(GREEN + "Update available. Updating...(DONT CLOSE!) ")
-			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-install.sh','CHANGELOG.md','.ver']
+			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-install.sh','CHANGELOG.MD','.ver']
 			for fn in files_to_update:
 				u=urllib.request.urlopen('https://raw.githubusercontent.com/R37r0-Gh057/Linder/master/'+fn).read().decode('utf-8')
 				f=open(fn,'w')
