@@ -67,11 +67,12 @@ def Update():
 				print_status(YELLOW + 'No updates available')
 			else:
 				print_status(GREEN + "Update available. Updating...(DONT CLOSE!")
-				os.system(rm + ' termux-install.sh main.py README.md CONTRIBUTORS.mf')
+				os.system(rm + ' termux-install.sh main.py README.md CONTRIBUTORS.md CHANGELOG.MD)
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/main.py')
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/README.md')
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/CONTRIBUTORS.md')
 				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/termux-install.sh')
+				os.system('wget https://github.com/R37r0-Gh057/Linder/raw/master/CHANGELOG.MD')
 				os.system('chmod +x *')
 				print_status(GREEN + "Update Finished")
 				exit()
