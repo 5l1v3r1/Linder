@@ -12,4 +12,4 @@ data connection is OFF
 ## v1.3
 
 - Removed curl , wget and which os based dependencies for better cross platform support.
-- Added function to check thr existence ot output path
+- Added function to check the existence of output path
