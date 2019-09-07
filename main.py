@@ -389,19 +389,36 @@ def argscheck():
 
 	if len(sys.argv) == 4:
 		if os.path.isfile(str(sys.argv[1])) and os.path.isfile(str(sys.argv[2])):
-			tar_bool = ''
-			for i in str(sys.argv[3].split('/')):
-				if i == '':
-					tar_bool +='/'
-				elif '.apk' in i:
-					pass
+			if '/' in str(sys.argv[3]):
+				tar_bool = ''
+				for i in str(sys.argv[3].split('/')):
+					if i == '':
+						tar_bool +='/'
+					elif '.apk' in i:
+						pass
+					else:
+						tar_bool+=i+'/'
+				if os.path.exists(tar_bool):
+					Bind()
 				else:
-					tar_bool+=i+'/'
-			if os.path.exists(tar_bool):
-				Bind()
+					err_msg('Invalid Output Path.\n %s does not exist.' % (tar_bool))
+					exit()
+			elif '\' in str(sys.argv[3]):
+				tar_bool = ''
+				for i in str(sys.argv[3].split('\')):
+					if i == '':
+						tar_bool +='\'
+					elif '.apk' in i:
+						pass
+					else:
+						tar_bool+=i+'\'
+				if os.path.exists(tar_bool):
+					Bind()
+				else:
+					err_msg('Invalid Output Path.\n %s does not exist.' % (tar_bool))
+					exit()
 			else:
-				err_msg('Invalid Output Path.\n %s does not exist.' % (tar_bool))
-				exit()
+				Bind()
 		else:
 			err_msg('APK(s) specified are not found!')
 			exit()
