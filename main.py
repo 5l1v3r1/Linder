@@ -403,20 +403,6 @@ def argscheck():
 				else:
 					err_msg('Invalid Output Path.\n %s does not exist.' % (tar_bool))
 					exit()
-			elif '\' in str(sys.argv[3]):
-				tar_bool = ''
-				for i in str(sys.argv[3].split('\')):
-					if i == '':
-						tar_bool +='\'
-					elif '.apk' in i:
-						pass
-					else:
-						tar_bool+=i+'\'
-				if os.path.exists(tar_bool):
-					Bind()
-				else:
-					err_msg('Invalid Output Path.\n %s does not exist.' % (tar_bool))
-					exit()
 			else:
 				Bind()
 		else:
