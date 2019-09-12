@@ -389,7 +389,32 @@ def argscheck():
 
 	if len(sys.argv) == 4:
 		if os.path.isfile(str(sys.argv[1])) and os.path.isfile(str(sys.argv[2])):
-			Bind()
+			if not '.apk' in sys.argv[3]:
+				err_msg('Output APK name not specified')
+				exit()
+			a = ''
+			delim = ''
+			if '/' in sys.argv[3]:
+				delim='/'
+			elif '\\' in sys.argv[3]:
+				delim='\\'
+			else:
+				pass
+			if delim == '':
+				Bind()
+			else:
+				for i in sys.argv[3].split(delim):
+					if i == '':
+						a += delim
+					elif '.apk' in i:
+						pass
+					else:
+						a+=i+delim
+				if os.path.exists(a):
+					Bind()
+				else:
+					err_msg('Output path specified does not exists')
+					exit()
 		else:
 			err_msg('APK(s) specified are not found!')
 			exit()
