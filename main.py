@@ -99,7 +99,6 @@ def ON():
 		return str(sys.argv[2])
 
 
-	return Android
 
 # Finding main activity smali
 
