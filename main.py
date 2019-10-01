@@ -76,8 +76,13 @@ def Update():
 			print_status(BLUE + "Please Restart The Script...")
 			exit()
 def Usage():
+	print(RED+"\n\t\tUsage:"+WHITE)
+	print(GREEN+"\nInterface Mode: \n\n"+WHITE)
+	print(YELLOW+f"python3 {sys.argv[0]}\n")
+	print(GREEN+"\nCommand Line Mode: \n\n"+WHITE)
 	print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk> \n' % (str(sys.argv[0])))
-	print('\n' + YELLOW + 'pass the ' + BLUE + "--update" + YELLOW + " parameter to update.\n" + WHITE)
+	print(GREEN+"\nTo UPDATE: \n\n"+WHITE)
+	print(YELLOW+f"python3 {sys.argv[0]} --update\n"+WHITE)
 	exit()
 
 # Getting payload apk name
