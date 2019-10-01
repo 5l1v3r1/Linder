@@ -1,6 +1,6 @@
 # Linder
 
-version 1.3b
+version 1.4b
 
 ## About
 
@@ -32,9 +32,19 @@ Just make sure apktool and apksigner are properly installed.
 
 ## Usage
 
+#### Interface Mode 
+
+`python3 main.py`
+
+#### Command Line Usage
+
 `python3 main.py path/to/payload.apk path/to/any/app.apk path/to/save/the/final/app/with/name.apk`
 
-example:- `python3 main.py /sdcard/somepayload.apk /sdcard/Whatsapp.apk /sdcard/Whatsapp_Infected.apk`
+Example:- `python3 main.py /sdcard/somepayload.apk /sdcard/Whatsapp.apk /sdcard/Whatsapp_Infected.apk`
+
+#### To Update 
+
+`python3 main.py --update`
 
 ## Contact
 
