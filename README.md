@@ -46,6 +46,12 @@ Example:- `python3 main.py /sdcard/somepayload.apk /sdcard/Whatsapp.apk /sdcard/
 
 `python3 main.py --update`
 
+## Troubleshooting
+
+If you are getting error while compilation/decompilation of APKs then update your Apktool/Apkmod to the latest version.
+
+Or if you are facing some other error then please open an issue here.
+
 ## Contact
 
 Telegram:- *@R37R0_GH057*
