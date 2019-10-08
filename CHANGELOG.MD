@@ -13,3 +13,8 @@ data connection is OFF
 
 - Removed curl , wget and which os based dependencies for better cross platform support.
 - Added function to check the existence of output path
+
+## v1.4
+
+- Added A Interface
+- Optimized Main Parts Again
