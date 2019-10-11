@@ -18,3 +18,8 @@ data connection is OFF
 
 - Added A Interface
 - Optimized Main Parts Again
+
+## v1.5b
+
+- Added `-a` option in apkmod to use aapt2
+- Session was not spawning so modified hook.
