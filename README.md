@@ -1,6 +1,6 @@
 # Linder
 
-version 1.4b
+version 1.5b
 
 ## About
 
