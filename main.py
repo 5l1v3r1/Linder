@@ -458,6 +458,7 @@ class Interactive:
 
 	def Start(self):
 		global payload_input,original_input,final_path
+		print_status("\nStarted Interactive mode. Type 'help' for list of available commands.\n")
 		while True:
 			void = input(YELLOW + "Linder>> " + WHITE)
 			if 'set' in void and len(void.split(' ')) == 3:
