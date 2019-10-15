@@ -415,10 +415,10 @@ class Interactive:
 				print("Payload ==> "+value)
 			else:
 				err_msg("Invalid path. '%s': does not exists." % (value))
-		elif option.lower() == 'original':
+		elif option.lower() == 'target':
 			if os.path.isfile(value):
 				original_input = value
-				print("Original ==> "+value)
+				print("Target ==> "+value)
 			else:
 				err_msg("Invalid path. '%s': does not exists." % (value))
 		elif option.lower() == 'output':
@@ -426,7 +426,7 @@ class Interactive:
 
 		else:
 			err_msg("Invalid option selected")
-
+			print('Allowed Options Are: payload , target, output')
 	def usage(self):
 		print('''
 
@@ -460,29 +460,30 @@ class Interactive:
 		global payload_input,original_input,final_path
 		print_status("\nStarted Interactive mode. Type 'help' for list of available commands.\n")
 		while True:
-			void = input(YELLOW + "Linder>> " + WHITE)
-			if 'set' in void and len(void.split(' ')) == 3:
-				self.SetCMD(void.split(' ')[1],void.split(' ')[2])
-			elif void.lower() == 'bind':
+			void = input(YELLOW + "Linder>> " + WHITE).strip().split(' ')
+			void=[vd for vd in void if vd.strip()!='']
+			if 'set' in void and len(void) == 3:
+				self.SetCMD(void[1],void[2])
+			elif void[0].lower() == 'bind':
 				if payload_input!='Not set' and original_input!='Not set' and final_path!='Not set':
 					Bind()
 				else:
 					err_msg("Some option(s) are not set.")
-			elif void.lower() == 'exit':
+			elif void[0].lower() == 'exit':
 				exit()
-			elif void.lower() == 'help':
+			elif void[0].lower() == 'help':
 				self.usage()
-			elif void.lower() == 'clear':
+			elif void[0].lower() == 'clear':
 				self.clear()
-			elif void.lower() == 'update':
+			elif void[0].lower() == 'update':
 				if isOnline():
 					Update()
 				else:
 					err_msg('Please turn ON your data connection')
-			elif void.lower() == 'options':
-				print('Payload = '+payload_input)
-				print('Original = ' +original_input)
-				print('Output = '+final_path)
+			elif void[0].lower() == 'options':
+				print('Payload => '+payload_input)
+				print('Target => ' +original_input)
+				print('Output => '+final_path)
 			else:
 				err_msg('Invalid Command')
 
