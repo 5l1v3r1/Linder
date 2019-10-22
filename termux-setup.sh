@@ -1,13 +1,21 @@
 #/#data/data/com.termux/files/usr/bin/sh
 
+echo "             Termux-Setup              "
+echo "∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞"
 apt update && apt install python wget bc -y
-
+clear
+echo "             Termux-Setup               "
+echo "∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞"
+echo "Update pkg & installed requirements done"
+sleep 2 
 if [ -e $PREFIX/bin/apkmod ]
 then
+  clear
   echo "             Termux-Setup              "
   echo "∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞"
   echo "           ALREADY INSTALLED           "
 else
+  clear
   cd $HOME
   wget https://raw.githubusercontent.com/Hax4us/Apkmod/master/setup.sh
   chmod +x setup.sh
