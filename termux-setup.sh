@@ -36,7 +36,7 @@ else
 	1 )
 		exit;;
 		2 )	sh termux-setup.sh
-		exit;;
+		exit;; 
          * ) echo "Please enter 1 or 2"
 		 sleep 3
      esac
