@@ -550,6 +550,7 @@ def argscheck():
 	elif len(sys.argv) == 5 and Termux_Bool():
 		if str(sys.argv[4]) == '--use-aapt2':
 			aapt2 = True
+			print_status('Using aapt2')
 		else:
 			Usage()
 			exit()
