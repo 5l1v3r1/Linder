@@ -45,9 +45,11 @@ Just make sure apktool and apksigner are properly installed.
 
 Example:- `python3 main.py /sdcard/somepayload.apk /sdcard/Whatsapp.apk /sdcard/Whatsapp_Infected.apk`
 
+To enable the use of aapt2 on termux, pass `--use-aapt2` arguement in the end.
+
 #### To Update 
 
-`python3 main.py --update`
+`python3 main.py --update` or type `update` in interactive mode.
 
 ## Troubleshooting
 
