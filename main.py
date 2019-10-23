@@ -86,7 +86,11 @@ def Update():
 			print_status(BLUE + "Please Restart The Script...")
 			exit()
 def Usage():
-	print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk> \n' % (str(sys.argv[0])))
+	if Termux_Bool():
+		print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk> <extra arg>\n' % (str(sys.argv[0])))
+		print('Extra args:- ' + YELLOW + "--use-aapt2" + WHITE)
+		exit()
+	print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk>\n' % (str(sys.argv[0])))
 	print('\n' + YELLOW + 'pass the ' + BLUE + "--update" + YELLOW + " parameter to update.\n" + WHITE)
 	exit()
 
@@ -529,8 +533,26 @@ def main():
 # This is self explanatory.
 
 def argscheck():
-	global interactive,payload_input,original_input,final_path
+	global interactive,payload_input,original_input,final_path,aapt2
 	if len(sys.argv) == 4:
+		if os.path.isfile(str(sys.argv[1])) and os.path.isfile(str(sys.argv[2])):
+			if not '.apk' in sys.argv[3]:
+				err_msg('Output APK name not specified')
+				exit()
+			pathcheck(sys.argv[3],'null')
+			payload_input=sys.argv[1]
+			original_input=sys.argv[2]
+			final_path=sys.argv[3]
+			main()
+		else:
+			err_msg('APK(s) specified are not found!')
+			exit()
+	elif len(sys.argv) == 5 and Termux_Bool():
+		if str(sys.argv[4]) == '--use-aapt2':
+			aapt2 = True
+		else:
+			Usage()
+			exit()
 		if os.path.isfile(str(sys.argv[1])) and os.path.isfile(str(sys.argv[2])):
 			if not '.apk' in sys.argv[3]:
 				err_msg('Output APK name not specified')
@@ -552,6 +574,7 @@ def argscheck():
                             exit()
 		else:
 			Usage()
+			exit()
 	else:
 		interactive=True
 		main()
