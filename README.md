@@ -1,10 +1,10 @@
 # Linder
 
-version 1.5b
+version 1.6b
 
 ## About
 
-This POC script embeds an metasploit generated android payload to any other APKs.
+This python script embeds an metasploit generated android payload to any other APKs.
 
 It just automates the following:-
 
@@ -20,6 +20,9 @@ It just automates the following:-
   
   [+] Signing.
 
+**[!] This only works with small apps for now. It binds the payload successfully but the final infected app does not give a session in msf handler. 
+	Tested apps:- [GETauto](https://play.google.com/store/apps/details?id=su.seu.get) and [Color Note](https://play.google.com/store/apps/details?id=com.socialnmobile.dictapps.notepad.color.note)**
+
 **There are some apps like FacebookLite which are a little protected by this method. The MainActivity smali file specified in the Manifest is not present. And there are also some other apps that throw some errors on decompiling. May take a while to fix.**
 
 And a Special Thanks to [TheSpeedX](https://github.com/TheSpeedX) for optimising this script.
@@ -28,7 +31,7 @@ And a Special Thanks to [TheSpeedX](https://github.com/TheSpeedX) for optimising
 
 Just make sure apktool and apksigner are properly installed.
 
-**NOTE FOR TERMUX**:- It wasnt possible for this script to run in termux in the previous version because its apktool cant decompile apps properly, but thanks to [Hax4us's APKMOD](https://github.com/Hax4us/Apkmod), its now possible. Run `termux-setup.sh` to install it and other dependencies.
+**NOTE FOR TERMUX**:- It wasnt possible for this script to run in termux in the previous version because its apktool cant decompile apps properly, but thanks to [Hax4us' APKMOD](https://github.com/Hax4us/Apkmod), its now possible. Run `termux-setup.sh` to install it and other dependencies.
 
 ## Usage
 
