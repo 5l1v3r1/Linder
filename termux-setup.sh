@@ -8,6 +8,9 @@ Install () {
   sh setup.sh
   if [ -e $PREFIX/bin/apkmod ]
   then
+    startalpine
+    apk add protobuf
+    exit
     clear
     echo Apkmod installed.
   else
