@@ -23,3 +23,8 @@ data connection is OFF
 
 - Added `-a` option in apkmod to use aapt2
 - Session was not spawning so modified hook.
+
+## v1.6b
+
+- Added an option to enable/disable the use of aapt2 in apkmod.
+- optimized termux-setup.sh
