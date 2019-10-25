@@ -31,7 +31,7 @@ And a Special Thanks to [TheSpeedX](https://github.com/TheSpeedX) for optimising
 
 Just make sure apktool and apksigner are properly installed.
 
-**NOTE FOR TERMUX**:- It wasnt possible for this script to run in termux in the previous version because its apktool cant decompile apps properly, but thanks to [Hax4us' APKMOD](https://github.com/Hax4us/Apkmod), its now possible. Do `./termux-setup` to install it and other dependencies.
+**NOTE FOR TERMUX**:- It wasnt possible for this script to run in termux in the previous version because its apktool cant decompile apps properly, but thanks to [Hax4us' APKMOD](https://github.com/Hax4us/Apkmod), its now possible. Do `./termux-setup.sh` to install it and other dependencies.
 
 ## Usage
 
