@@ -356,7 +356,7 @@ def Bind():
 			subprocess.call("apktool b %s -o %s -f" % (original.replace('.apk',''),str(final_path)),shell=True)
 			subprocess.call(mv + ' '+ str(final_path) + ' ..',shell=True)
 			os.chdir('../')
-		if os.path.exists('fin_out.apk'):
+		if os.path.exists('TempP/fin_out.apk'):
 			pass
 		else:
 			if Termux_Bool():
